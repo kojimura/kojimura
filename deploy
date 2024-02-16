@@ -1,0 +1,13 @@
+#!/bin/bash -eux
+source "$(dirname $0)/bin/conf"
+
+[ "$USER" = "root" ] # USER MUST BE ROOT
+
+### pull date ###
+rm -rf "${contentsdir:?}"
+cd "$wwwdir"
+git clone "https://github.com/$contents_owner/$contents"
+chown apache:apache "$contentsdir" -R
+
+
+

@@ -1,0 +1,6 @@
+contents="kojimura_contents"
+contents_owner="kojimura"
+wwwdir="/var/www/sub-domains/kojimura.xyz"
+contentsdir="$wwwdir/$contents"
+appdir="$wwwdir/kojimura"
+
