@@ -10,7 +10,7 @@ chown apache:apache "$appdir" -R
 ### rename fetch cgi ###
 cd "$appdir"
 rnd=$(cat /dev/urandom | tr -cd 0-9a-zA-Z | head -c 32)
-[ -e "/home/rockey/rnd" ] && rnd=$(cat /home/rockey/rnd) # remove on release!!!
+[ -e "/home/rocky/rnd" ] && rnd=$(cat /home/rocky/rnd) # remove on release!!!
 mv "fetch" "fetch_$rnd.cgi"
 
 ### pull article repo ###
