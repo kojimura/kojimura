@@ -78,7 +78,7 @@ while read ymd hms d; do
    xargs -I@ cat "$datadir/@/link" |
    awk 'NR<=2{print}END{for(i=NR;i<2;i++){print "LOST TITLE"}}' |
    sed -e '1s/^/prev:/' -e '2s/^/next:/' |
-   tr '\n' ' ' > "$datadir/$d/nav"
+   tr -d '\n' > "$datadir/$d/nav"
 done
 
 #rm -f $tmp-*
