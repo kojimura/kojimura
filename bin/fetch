@@ -81,4 +81,4 @@ while read ymd hms d; do
    tr -d '\n' > "$datadir/$d/nav"
 done
 
-#rm -f $tmp-*
+rm -f $tmp-*

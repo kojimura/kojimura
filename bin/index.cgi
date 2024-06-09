@@ -3,11 +3,13 @@ source "$(dirname $0)/conf"
 exec 2> "$logdir/$(basename $0).$(date +%Y%m%d_%H%M%S).$$"
 set -o pipefail
 
-#trap 'rm -f $tmp-*' EXIT
+trap 'rm -f $tmp-*' EXIT
 
 ### VARIABLES ###
 tmp=/tmp/$$
 dir="$(tr -dc 'a-zA-Z0-9_=' <<< ${QUERY_STRING} | sed 's;=;s/;')"
+[ -z "$dir" ] && dir="pages/top"
+[ "$dir" = "post" ] && dir="$(tail -n 1 "$datadir/post_list" | cut -d'' -f 3)"
 md="$contentsdir/$dir/main.md"
 [ -f "$md" ]
 
