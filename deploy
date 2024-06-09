@@ -5,8 +5,8 @@ source "$(dirname $0)/bin/conf"
 [ "$USER" = "root" ] # USER MUST BE ROOT
 
 ### CREATE DIRECTORIES ###
-mkdir -p "$logdir" "$datadir"
-chown apache:apache "$logdir" "$datadir"
+mkdir -p "$logdir" "$datadir" "$datadir/counters"
+chown apache:apache "$logdir" "$datadir" "$datadir/counters"
 
 ### install the system: bin -> appdir(/var/www/sub-domeins/kojimura.xyz/kojimura) ###
 rsync -av --delete "$(dirname $0)/bin/" "$appdir/"
