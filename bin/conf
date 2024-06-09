@@ -3,4 +3,7 @@ contents_owner="kojimura"
 wwwdir="/var/www/sub-domains/kojimura.xyz"
 contentsdir="$wwwdir/$contents"
 appdir="$wwwdir/kojimura"
-
+viewdir="$appdir/view"
+logdir="/var/log/$contents"
+datadir="${contentsdir}_data"
+export LANG=ja_JP.UTF-8

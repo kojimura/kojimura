@@ -1,8 +1,84 @@
-#!/bin/bash -ex
+#!/bin/bash -euvx
 source "$(dirname $0)/conf"
+exec 2> "$logdir/$(basename $0).$(date +%Y%m%d_%H%M%S).$$"
 [ -n "${CONTENT_LENGTH}" ] && dd bs=${CONTENT_LENGTH} > /dev/null
 
 echo -e 'Content-type: text/html\n\n'
 
 cd "$contentsdir"
 git pull
+
+### CREATE TIMESTAMP FILES IF NOT EXIST ###
+find posts pages -maxdepth 1 -type d |
+grep / |
+while read d ; do
+  [ -f "$contentsdir/$d/main.md" ] &&
+  mkdir -p "$datadir/$d"
+  ### ADD TIME FILES ###
+  git log -p "$contentsdir/$d/main.md" |
+  grep '^Date:' |
+  awk '{print $2,$3,$4,$5,$6}' |
+  date -f - "+%Y-%m-%d %H:%M:%S" |
+  awk -v cf="$datadir/$d/created_time" \
+    -v mf="$datadir/$d/modified_time" \
+    'NR==1{print > mf}END{print > cf}'
+done
+
+### PURGE DELETED ARTICLES ###
+cd "$datadir"
+find posts pages -maxdepth 1 -type d |
+grep / |
+while read d; do
+  [ -f "$contentsdir/$d/main.md" ] && continue
+  ls -lR "./$d"
+  rm -Rf "./$d"
+done
+### MAKE SOME SHORTCUT ###
+find posts pages -maxdepth 1 -type d |
+grep / |
+while read d; do
+  [ -f "$contentsdir/$d/main.md" ] || continue
+
+  grep -m 1 '^#' "$contentsdir/$d/main.md" |
+    sed 's/^# *//' |
+    awk '{if(^$/){print "NO TITLE"}else{print}}
+      END{if(NR==0){print "NO TITLE"}}' |
+    tee "$datadir/$d/title"
+    awk -v d="$d" '{gsub(/s\//,"=",d);
+      print "<a href=\"/?" d "\">" $0 "</a>"}' > "$datadir/$d/link"
+
+  touch "$datadir/$d/nav"
+done
+
+### MAKE POST/PAGE LIST ###
+tmp=/tmp/$$
+
+# LIST POSTS DATA
+cd "$datadir"
+find posts pages -type f |
+grep created_time |
+xargs grep -H . |
+sed 's;/created_time:; ;' |
+awk '{print $2,$3,$1}' |
+sort -k1,2 |
+tee $tmp-list |
+awk '$3~/^posts/' > $tmp-post_list
+mv $tmp-post_list "$datadir/post_list"
+
+# LIST PAGES DATA
+awk '$3~/^pages/' $tmp-list > $tmp-page_list
+mv $tmp-page_list "$datadir/page_list"
+
+# MAKE PREV/NEXT NAVIGATION LINK
+cat "$datadir/post_list" |
+while read ymd hms d; do
+  grep -C1 "$d$" "$datadir/post_list" |
+    awk '{print $3}' |
+    sed -n -e '1p' -e '$p' |
+    xargs -I@ cat "$datadir/@/link" |
+    awk 'NR<=2{print}END{for(i=NR;i<2;i++){print "LOST TITLE"}}' |
+    sed -e '1s/^/prev:/' -e '2s/^/next:/' |
+    tr '\n''' > "$datadir/$d/nav"
+done
+
+#rm -f $tmp-*
